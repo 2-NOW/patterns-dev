@@ -61,8 +61,12 @@ const Home: NextPage = () => {
     });
   };
 
+  const todoList = todos
+    .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+    .sort((a, b) => +a.completed - +b.completed);
+
   const props = {
-    todos,
+    todoList,
     register,
     handleSubmit,
     handleCheck,
