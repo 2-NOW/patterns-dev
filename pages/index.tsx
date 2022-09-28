@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { NextPage } from "next";
 import { setCookie, getCookie } from "cookies-next";
+import ToDoView from "components/pages/ToDoView";
 
-type Todo = {
+export type Todo = {
   todo: string;
   completed: boolean;
   createdAt: number;
 };
 
+export interface FormValues {
+  todo: string;
+}
+
 const Home: NextPage = () => {
-  const { register, handleSubmit: onSubmit, reset } = useForm();
+  const { register, handleSubmit: onSubmit, reset } = useForm<FormValues>();
   const [todos, setTodos] = useState<Todo[]>([]);
 
   useEffect(() => {
@@ -36,14 +41,11 @@ const Home: NextPage = () => {
     reset();
   });
 
-  const handleChecked = (index: number) => {
+  const handleCheck = (index: number) => {
     setTodos((prev) => {
       const newTodo = [
         ...prev.slice(0, index),
-        {
-          ...prev[index],
-          completed: !prev[index].completed,
-        },
+        { ...prev[index], completed: !prev[index].completed },
         ...prev.slice(index + 1),
       ];
       updateTodos(newTodo);
@@ -59,41 +61,15 @@ const Home: NextPage = () => {
     });
   };
 
-  return (
-    <div className={"container mx-auto px-4 py-8"}>
-      <h1 className={"text-4xl font-bold mb-4"}>Todo App</h1>
-      <form onSubmit={handleSubmit} className="flex gap-4">
-        <input
-          {...register("todo")}
-          type="text"
-          className="input input-bordered w-full"
-          placeholder="Add Some Todo..."
-        />
-        <button className="btn btn-primary">추가하기</button>
-      </form>
-      <div className="flex flex-col gap-4 mt-8">
-        {todos
-          .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-          .sort((a, b) => +a.completed - +b.completed)
-          .map((todo, index) => (
-            <div key={+todo.createdAt} className="flex items-center gap-4">
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => handleChecked(index)}
-                className="checkbox"
-              />
-              <span onClick={() => handleChecked(index)} className="flex-1 cursor-pointer">
-                {todo.completed ? <s>{todo.todo}</s> : todo.todo}
-              </span>
-              <button onClick={() => handleDelete(index)} className="btn btn-square btn-error btn-xs">
-                X
-              </button>
-            </div>
-          ))}
-      </div>
-    </div>
-  );
+  const props = {
+    todos,
+    register,
+    handleSubmit,
+    handleCheck,
+    handleDelete,
+  };
+
+  return <ToDoView {...props} />;
 };
 
 export default Home;
